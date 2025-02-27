@@ -17,7 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/explorer" element={<MemeExplorer />} />
         <Route path="/upload" element={<UploadMeme />} />
-        <Route path="/meme/:memeID" element={<MemeDetails />} />
+        <Route path="/meme/:id" element={<MemeDetails />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="*" element={<NotFound />} />

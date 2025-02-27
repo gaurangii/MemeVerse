@@ -187,7 +187,7 @@ const MemeExplorer = () => {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-[#FEF9E1]">
       <h1 className="text-4xl font-bold text-center mb-8 text-[#443627]">
         🔎 Explore Memes
       </h1>
