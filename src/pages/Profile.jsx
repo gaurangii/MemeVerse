@@ -35,6 +35,8 @@ const Profile = () => {
   };
 
   return (
+    <>
+    <div className="p-6 bg-[#FEF9E1]">
     <div className="p-6 max-w-3xl mx-auto text-black">
       {/* Profile Header */}
       <div className="flex items-center gap-4">
@@ -98,6 +100,8 @@ const Profile = () => {
         {tab === "saved" && <div className="text-center text-gray-400">No saved memes yet.</div>}
       </div>
     </div>
+    </div>
+    </>
   );
 };
 
