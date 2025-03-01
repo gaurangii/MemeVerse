@@ -1,49 +1,11 @@
-// import { useState } from "react";
-
-// const UploadMeme = () => {
-//   const [image, setImage] = useState(null);
-
-//   return (
-//     <div className="p-6">
-//       <h1 className="text-4xl font-bold text-center mb-6">📤 Upload Meme</h1>
-//       <div className="bg-gray-900 p-6 rounded-lg shadow-lg text-center">
-//         <input
-//           type="file"
-//           accept="image/*"
-//           onChange={(e) => setImage(URL.createObjectURL(e.target.files[0]))}
-//           className="border p-3 w-full rounded-lg shadow-md bg-gray-800 text-white"
-//         />
-//         {image && <img src={image} alt="Meme preview" className="mt-4 max-w-full rounded-lg" />}
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default UploadMeme;
-
-
-
-
-
-
-
-
-
-
-
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const UploadMeme = ({ setProfile }) => {
-  const [showForm, setShowForm] = useState(false);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [memeName, setMemeName] = useState("");
-  const [caption, setCaption] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
-  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -53,74 +15,85 @@ const UploadMeme = ({ setProfile }) => {
     }
   };
 
-  const handleUpload = async () => {
-    if (!file || !memeName.trim()) return;
+  const convertToBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result.split(",")[1]); // Get only Base64 content
+      reader.onerror = (error) => reject(error);
+    });
+  };
 
-    const formData = new FormData();
-    formData.append("meme", file);
-    formData.append("name", memeName);
-    formData.append("caption", caption);
+  const handleUpload = async () => {
+    if (!file || !memeName.trim()) {
+      alert("Please fill all required fields");
+      return;
+    }
 
     try {
-      const response = await axios.post("https://api.example.com/upload", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const base64Image = await convertToBase64(file);
+      const formData = new FormData();
+      formData.append("key", "81cf766ecf0d12b70683d1b08cece0d7");
+      formData.append("image", base64Image);
+      formData.append("name", memeName);
+
+      const response = await axios.post("https://api.imgbb.com/1/upload", formData);
+
       console.log("Upload successful:", response.data);
-      
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        uploads: prevProfile.uploads + 1,
-        memes: [...(prevProfile.memes || []), { url: preview, name: memeName, caption }],
-      }));
-      
+      const imageUrl = response.data.data.url;
+
+      if (setProfile) {
+        setProfile((prevProfile) => ({
+          ...prevProfile,
+          uploads: (prevProfile.uploads || 0) + 1,
+          memes: [...(prevProfile.memes || []), { url: imageUrl, name: memeName }],
+        }));
+      }
+
       setUploadMessage("🎉 Your meme has been uploaded!");
-      setTimeout(() => navigate("/profile"), 2000); // Redirect after 2 seconds
+
+      setTimeout(() => {
+        setUploadMessage("");
+        setFile(null);
+        setPreview(null);
+        setMemeName("");
+      }, 5000);
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("Upload failed:", error.response?.data || error.message);
+      alert("Upload Failed. Please try again.");
     }
   };
 
   return (
-    <div className="p-6 bg-[#FEF9E1] text-center">
-      {!showForm ? (
+    <div className="p-8 bg-[#FEF9E1] min-h-screen flex flex-col justify-center items-center">
+      <div className="p-6 bg-gray-800 text-white rounded-xl shadow-xl w-full max-w-md relative">
+        <h1 className="text-4xl font-extrabold text-yellow-400 mb-6 text-center">📤 Upload Your Meme</h1>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="mb-4 p-3 border border-gray-500 bg-gray-700 text-white rounded-lg w-full cursor-pointer"
+        />
+        <input
+          type="text"
+          placeholder="Enter meme name"
+          value={memeName}
+          onChange={(e) => setMemeName(e.target.value)}
+          className="mb-4 p-3 border border-gray-500 bg-gray-700 text-white rounded-lg w-full"
+        />
+        {preview && <img src={preview} alt="Preview" className="my-4 max-w-full mx-auto rounded-lg shadow-lg" />}
         <button
-          onClick={() => setShowForm(true)}
-          className="px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl shadow-lg hover:bg-yellow-600"
+          onClick={handleUpload}
+          className="w-full px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl shadow-lg hover:bg-yellow-600 transition duration-300"
         >
-          Upload Meme
+          Submit
         </button>
-      ) : (
-        <div className="mt-6 p-4 bg-gray-800 text-white rounded-lg shadow-lg">
-          <h1 className="text-3xl font-bold text-yellow-400 mb-4">📤 Upload Your Meme</h1>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="mb-4 p-2 border border-gray-500 bg-gray-700 text-white rounded-lg w-full"
-          />
-          <input
-            type="text"
-            placeholder="Enter meme name"
-            value={memeName}
-            onChange={(e) => setMemeName(e.target.value)}
-            className="mb-4 p-2 border border-gray-500 bg-gray-700 text-white rounded-lg w-full"
-          />
-          <textarea
-            placeholder="Enter a caption (optional)"
-            value={caption}
-            onChange={(e) => setCaption(e.target.value)}
-            className="mb-4 p-2 border border-gray-500 bg-gray-700 text-white rounded-lg w-full"
-          ></textarea>
-          {preview && <img src={preview} alt="Preview" className="my-4 max-w-xs mx-auto rounded-lg shadow-lg" />}
-          <button
-            onClick={handleUpload}
-            className="mt-4 px-6 py-3 bg-yellow-500 text-black font-bold rounded-xl shadow-lg hover:bg-yellow-600"
-          >
-            Submit
-          </button>
-        </div>
-      )}
-      {uploadMessage && <p className="mt-4 text-green-600 font-bold">{uploadMessage}</p>}
+        {uploadMessage && (
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 bg-green-500 text-white text-center font-bold rounded-lg shadow-lg animate-fadeIn">
+            {uploadMessage}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

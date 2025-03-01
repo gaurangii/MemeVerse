@@ -24,7 +24,8 @@ const Navbar = () => {
       <div className="flex items-center px-12">
         {/* Logo on the left */}
         <div className="w-32 h-24 flex-shrink-0">
-          <img src={logo} alt="MemeVerse Logo" className="h-full w-auto" />
+        <Link to="/">
+          <img src={logo} alt="MemeVerse Logo" className="h-full w-auto" /></Link>
         </div>
 
         {/* Navigation container pushed to the right */}

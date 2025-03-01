@@ -2,7 +2,7 @@ import logo from "../assets/logo.png";
 
 const Footer = () => {
     return (
-      <footer className="bg-gray-900 text-gray-300 py-8 mt-16">
+      <footer className="bg-gray-900 text-gray-300 py-8">
         <div className="container mx-auto flex flex-col md:flex-row items-center justify-between px-8">
           
           {/* Left Section - Logo & Tagline */}
